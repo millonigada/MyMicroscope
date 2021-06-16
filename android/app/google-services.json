@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "241265334628",
+    "project_id": "my-camera-a76e7",
+    "storage_bucket": "my-camera-a76e7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:241265334628:android:9fc29ed80ecf27cd528271",
+        "android_client_info": {
+          "package_name": "com.millonigada.my_camera"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "241265334628-gvadj5hm26fol0jpfnnq91fmlbfpbmlg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCyPnz8IT3lWhlgaoNbCRR-oX-EyMcIxtM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "241265334628-gvadj5hm26fol0jpfnnq91fmlbfpbmlg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

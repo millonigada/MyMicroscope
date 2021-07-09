@@ -5,27 +5,38 @@ import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_circular_slider/flutter_circular_slider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:my_camera/constants/colors.dart';
+import 'package:my_camera/constants/keys.dart';
 import 'package:my_camera/screens/galleryScreen.dart';
 import 'package:my_camera/screens/imageScreen.dart';
 import 'package:my_camera/screens/videoScreen.dart';
+import 'package:my_camera/widgets/cameraControls.dart';
+import 'package:my_camera/widgets/observationAppBar.dart';
 import 'package:native_device_orientation/native_device_orientation.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:video_player/video_player.dart';
 import 'package:toast/toast.dart';
 import 'package:flutter/services.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+import 'package:flutter_socket_plugin/flutter_socket_plugin.dart';
 
 class CameraScreen extends StatefulWidget {
+
+  final int selectedMenuButtonIndex;
+  CameraScreen({this.selectedMenuButtonIndex});
 
   @override
   _CameraScreenState createState() => _CameraScreenState();
 }
 
-class _CameraScreenState extends State<CameraScreen> with SingleTickerProviderStateMixin{
+class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMixin{
 
   CameraController cameraController;
+  List<Widget> appBarsList = [observationAppBar(), sizeDistributionAppBar()];
   List myCameras;
   int selectedCameraIndex;
   String imgPath;
@@ -45,20 +56,40 @@ class _CameraScreenState extends State<CameraScreen> with SingleTickerProviderSt
   bool measuringMode = false;
   List<Offset> _offsets = <Offset>[];
   TabController _tabController;
+  TabController _appBarTabController;
   double _colorFilterOpacity = 0.8;
   bool openedUpMode = false;
+  ///String magnificationDropdownValue = "M";
+  double _magnificationSliderValue = 10;
+  double _lightIntensitySliderValue = 10;
+  double _fSliderValue = 10;
+  FlutterSocket flutterSocket;
+  bool connected = false;
+  String _host = "2.2.2.2";
+  int _port = 80;
+  String receiveMessage = "";
+  bool magnifyTapped = false;
+  bool focusTapped = false;
+  bool lightTapped = false;
+  bool videoMode = false;
+  TextEditingController magnificationTextEditingController = TextEditingController();
   
   @override
   void initState() {
     super.initState();
+    initSocket();
     availableCameras().then((availableCameras){
       myCameras = availableCameras;
 
       if(myCameras.length > 0){
-        setState(() {
-          selectedCameraIndex = 0;
-        });
-        initCameraController(myCameras[selectedCameraIndex]).then((void v){});
+        // setState(() {
+        //   selectedCameraIndex = getCameraPreferences();
+        // });
+        getCameraPreferences().then((void v){
+          print("selectedCameraIndex: $selectedCameraIndex");
+            initCameraController(myCameras[selectedCameraIndex]).then((void v){});
+          }
+        );
       } else{
         print('No cameras found.');
       }
@@ -69,6 +100,7 @@ class _CameraScreenState extends State<CameraScreen> with SingleTickerProviderSt
       [DeviceOrientation.portraitUp]
     );
     _tabController = new TabController(vsync: this, length: 2);
+    _appBarTabController = new TabController(vsync: this, length: 4);
   }
 
   @override
@@ -77,12 +109,64 @@ class _CameraScreenState extends State<CameraScreen> with SingleTickerProviderSt
     cameraController?.dispose();
     videoController?.dispose();
     _tabController.dispose();
+    flutterSocket.tryDisconnect();
     SystemChrome.setPreferredOrientations(
       [DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown]
     );
+  }
+
+  getCameraPreferences() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    if(prefs.containsKey(cameraKey)){
+      print("If called");
+      print("prefs.getInt(cameraKey): ${prefs.getInt(cameraKey)}");
+      setState(() {
+        selectedCameraIndex = prefs.getInt(cameraKey);
+      });
+    } else {
+      print("Else called");
+      setState(() {
+        selectedCameraIndex = 0;
+      });
+    }
+  }
+
+  initSocket() async {
+
+    /// init socket
+    flutterSocket = FlutterSocket();
+
+    /// listen connect callback
+    flutterSocket.connectListener((data){
+      print("connect listener data:$data");
+    });
+
+    /// listen error callback
+    flutterSocket.errorListener((data){
+      print("error listener data:$data");
+    });
+
+    /// listen receive callback
+    flutterSocket.receiveListener((data){
+      print("receive listener data:$data");
+      if (data != null) {
+        receiveMessage = receiveMessage + "\n" + data;
+      }
+      setState(() {
+
+      });
+    });
+
+    /// listen disconnect callback
+    flutterSocket.disconnectListener((data){
+      print("disconnect listener data:$data");
+    });
+
+    await flutterSocket.createSocket(_host, _port, timeout: 20);
+    flutterSocket.tryConnect();
   }
 
   Future initCameraController(CameraDescription cameraDescription) async {
@@ -190,7 +274,10 @@ class _CameraScreenState extends State<CameraScreen> with SingleTickerProviderSt
             imgPath = file.path;
           });
           print('ImageFilePath: ${file.path}');
-          Toast.show("Slide up to view details about your image.", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
+          Navigator.push(context, MaterialPageRoute(builder: (context){
+            return ImageScreen(imgFile: imgFile, imgPath: imgPath);
+          }));
+          //Toast.show("Slide up to view details about your image.", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
         }
       });
     } catch (e){
@@ -238,7 +325,7 @@ class _CameraScreenState extends State<CameraScreen> with SingleTickerProviderSt
     }
 
     return CustomPaint(
-      // foregroundPainter: MeasurePainter(offsets: _offsets, measuringMode: measuringMode, currentScale: _currentScale),
+      foregroundPainter: MeasurePainter(offsets: _offsets, measuringMode: measuringMode, currentScale: _currentScale),
       child: AspectRatio(
           //aspectRatio: cameraController.value.aspectRatio,
         aspectRatio: 3/4,
@@ -250,19 +337,19 @@ class _CameraScreenState extends State<CameraScreen> with SingleTickerProviderSt
               child: LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints){
                   return GestureDetector(
-                    // behavior: HitTestBehavior.opaque,
-                    // onScaleStart: handleScaleStart,
-                    // onScaleUpdate: handleScaleUpdate,
-                    // onTapDown: measuringMode ? (details){
-                    //   if(_offsets.length<2)
-                    //     {
-                    //       Toast.show("Now tap to set your second point.", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.TOP);
-                    //     }
-                    //   final RenderBox referenceBox = context.findRenderObject();
-                    //   setState(() {
-                    //     _offsets.add(referenceBox.globalToLocal(details.globalPosition));
-                    //   });
-                    // } : null,
+                    behavior: HitTestBehavior.opaque,
+                    onScaleStart: handleScaleStart,
+                    onScaleUpdate: handleScaleUpdate,
+                    onTapDown: measuringMode ? (details){
+                      if(_offsets.length<2)
+                        {
+                          Toast.show("Now tap to set your second point.", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.TOP);
+                        }
+                      final RenderBox referenceBox = context.findRenderObject();
+                      setState(() {
+                        _offsets.add(referenceBox.globalToLocal(details.globalPosition));
+                      });
+                    } : null,
                   );
                 },
               ),
@@ -288,27 +375,52 @@ class _CameraScreenState extends State<CameraScreen> with SingleTickerProviderSt
     await cameraController.setZoomLevel(_currentScale);
   }
 
-  Widget zoomSlider(){
+  Widget fSlider(){
     return Slider(
-        value: _currentScale,
-        min: _minAvailableZoom,
-        max: _maxAvailableZoom,
+        value: _fSliderValue,
+        min: 0,
+        max: 100,
         divisions: 100,
-        label: _currentScale.toStringAsFixed(2)+'x',
+        //label: _currentScale.toStringAsFixed(2)+'x',
         activeColor: Colors.white,
         inactiveColor: Colors.grey,
-        onChanged: (double value) async {
-          setState((){
-            _currentScale = (_baseScale*value).clamp(_minAvailableZoom, _maxAvailableZoom);
-            debugPrint('_currentScale\n');
-            debugPrint(_currentScale.toString());
-            scaleEnd = 12/_currentScale;
-            debugPrint(scaleEnd.toString());
+        onChanged: (double value) {
+          // setState((){
+          //   _currentScale = (_baseScale*value).clamp(_minAvailableZoom, _maxAvailableZoom);
+          //   debugPrint('_currentScale\n');
+          //   debugPrint(_currentScale.toString());
+          //   scaleEnd = 12/_currentScale;
+          //   debugPrint(scaleEnd.toString());
+          // });
+          // await cameraController.setZoomLevel(_currentScale);
+          setState(() {
+            _fSliderValue = value;
           });
-          await cameraController.setZoomLevel(_currentScale);
         }
     );
   }
+
+  // Widget lightIntensitySlider(){
+  //   return Slider(
+  //       value: _lightIntensitySliderValue,
+  //       min: 0,
+  //       max: 1024,
+  //       divisions: 1024,
+  //       //label: _currentScale.toStringAsFixed(2)+'x',
+  //       activeColor: Colors.white,
+  //       inactiveColor: Colors.grey,
+  //       onChanged: (double value) {
+  //         // print(value);
+  //         // setState(() {
+  //         //   _lightIntensitySliderValue = value;
+  //         // });
+  //         // flutterSocket.send('$value');
+  //       },
+  //       onChangeEnd: (double value){
+  //
+  //       },
+  //   );
+  // }
 
   void onVideoRecordButtonPressed() {
     startVideoRecording().then((_) {
@@ -648,6 +760,42 @@ class _CameraScreenState extends State<CameraScreen> with SingleTickerProviderSt
     }
   }
 
+  onMagnifyTapped(){
+    setState(() {
+      if(magnifyTapped==false){
+        magnifyTapped=true;
+        focusTapped=false;
+        lightTapped=false;
+      }else{
+        magnifyTapped=false;
+      }
+    });
+  }
+
+  onFocusTapped(){
+    setState(() {
+      if(focusTapped==false){
+        magnifyTapped=false;
+        focusTapped=true;
+        lightTapped=false;
+      }else{
+        focusTapped=false;
+      }
+    });
+  }
+
+  onLightTapped(){
+    setState(() {
+      if(lightTapped==false){
+        magnifyTapped=false;
+        focusTapped=false;
+        lightTapped=true;
+      }else{
+        lightTapped=false;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -661,172 +809,356 @@ class _CameraScreenState extends State<CameraScreen> with SingleTickerProviderSt
     return WillPopScope(
       onWillPop: _onWillPop,
           child: Scaffold(
+          // appBar: observationAppBar(
+          //     tabController: _appBarTabController,
+          //     context: context,
+          //   magnificationDropdownValue: magnificationDropdownValue,
+          //   onChangedmagnificationDropdownValue: (String newValue){
+          //       setState(() {
+          //         magnificationDropdownValue = newValue;
+          //       });
+          //   }
+          // ),
           body: Container(
-            child: SafeArea(
-              child: Stack(
-                alignment: Alignment.bottomCenter,
-                //crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    height: MediaQuery.of(context).size.height,
-                    //width: MediaQuery.of(context).size.width,
-                    child: NativeDeviceOrientationReader(
-                      useSensor: true,
-                      builder: (context){
-                        NativeDeviceOrientation deviceOrientation = NativeDeviceOrientationReader.orientation(context);
-                        int turns;
-                        switch(deviceOrientation){
-                          case NativeDeviceOrientation.landscapeLeft: turns = 1; break;
-                          case NativeDeviceOrientation.landscapeRight: turns = -1; break;
-                          case NativeDeviceOrientation.portraitDown: turns = 2; break;
-                          case NativeDeviceOrientation.portraitUp: turns = 0; break;
-                          default: turns=0; break;
-                        }
-                        return RotatedBox(
-                            quarterTurns: turns,
-                            child: ClipRRect(
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(8.0),
-                              topRight: Radius.circular(8.0),
-                              bottomRight: Radius.circular(8.0),
-                              bottomLeft: Radius.circular(8.0),
-                            ),
-                                child: cameraPreview()
-                            )
-                        );
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              //crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  height: MediaQuery.of(context).size.height,
+                  //width: MediaQuery.of(context).size.width,
+                  child: NativeDeviceOrientationReader(
+                    useSensor: true,
+                    builder: (context){
+                      NativeDeviceOrientation deviceOrientation = NativeDeviceOrientationReader.orientation(context);
+                      int turns;
+                      switch(deviceOrientation){
+                        case NativeDeviceOrientation.landscapeLeft: turns = 1; break;
+                        case NativeDeviceOrientation.landscapeRight: turns = -1; break;
+                        case NativeDeviceOrientation.portraitDown: turns = 2; break;
+                        case NativeDeviceOrientation.portraitUp: turns = 0; break;
+                        default: turns=0; break;
                       }
-                    ),
+                      return RotatedBox(
+                          quarterTurns: turns,
+                          child: ClipRRect(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(8.0),
+                            topRight: Radius.circular(8.0),
+                            bottomRight: Radius.circular(8.0),
+                            bottomLeft: Radius.circular(8.0),
+                          ),
+                              child: cameraPreview()
+                          )
+                      );
+                    }
                   ),
-                  ColorFiltered(
-                    colorFilter: ColorFilter.mode(
-                        Colors.black.withOpacity(openedUpMode?0.0:0.8), BlendMode.srcOut),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Container(
+                ),
+                // ColorFiltered(
+                //   colorFilter: ColorFilter.mode(
+                //       Colors.black.withOpacity(openedUpMode?0.0:0.8), BlendMode.srcOut),
+                //   child: Stack(
+                //     fit: StackFit.expand,
+                //     children: [
+                //       Container(
+                //         decoration: BoxDecoration(
+                //             color: Colors.black,
+                //             backgroundBlendMode: BlendMode.dstOut),
+                //       ),
+                //       !openedUpMode ? Container(
+                //         margin: EdgeInsets.only(top: 125),
+                //         child: Align(
+                //           alignment: Alignment.topCenter,
+                //             child: circularZoomDial(context),
+                //           ),
+                //       ) : Container(),
+                //       GestureDetector(
+                //         onTap: (){
+                //           print("Gesture detector called.");
+                //           setState(() {
+                //             openedUpMode=true;
+                //           });
+                //           Toast.show("Press back for minimized view", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.CENTER);
+                //         },
+                //         child: Container(
+                //           margin: const EdgeInsets.only(top: 150),
+                //           child: Align(
+                //             alignment: Alignment.topCenter,
+                //             child: Container(
+                //                   height: 300,
+                //                   width: 300,
+                //                   decoration: BoxDecoration(
+                //                       color: Colors.red,
+                //                       shape: BoxShape.circle
+                //                   ),
+                //                 ),
+                //           ),
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
+                measuringMode ? CustomPaint(
+                  foregroundPainter: MeasurePainter(offsets: _offsets, measuringMode: measuringMode, currentScale: _currentScale),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    // onScaleStart: handleScaleStart,
+                    // onScaleUpdate: handleScaleUpdate,
+                    onTapDown: measuringMode ? (details){
+                      if(_offsets.length<2)
+                      {
+                        Toast.show("Now tap to set your second point.", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.TOP);
+                      }
+                      final RenderBox referenceBox = context.findRenderObject();
+                      setState(() {
+                        _offsets.add(referenceBox.globalToLocal(details.globalPosition));
+                      });
+                    } : null,
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 150),
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: Container(
+                          height: 300,
+                          width: 300,
                           decoration: BoxDecoration(
-                              color: Colors.black,
-                              backgroundBlendMode: BlendMode.dstOut),
-                        ),
-                        !openedUpMode ? Container(
-                          margin: EdgeInsets.only(top: 125),
-                          child: Align(
-                            alignment: Alignment.topCenter,
-                              child: circularZoomDial(context),
-                            ),
-                        ) : Container(),
-                        GestureDetector(
-                          onTap: (){
-                            print("Gesture detector called.");
-                            setState(() {
-                              openedUpMode=true;
-                            });
-                            Toast.show("Press back for minimized view", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.CENTER);
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.only(top: 150),
-                            child: Align(
-                              alignment: Alignment.topCenter,
-                              child: Container(
-                                    height: 300,
-                                    width: 300,
-                                    decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        shape: BoxShape.circle
-                                    ),
-                                  ),
-                            ),
+                              color: Colors.transparent,
+                              shape: BoxShape.circle
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                  measuringMode ? CustomPaint(
-                    foregroundPainter: MeasurePainter(offsets: _offsets, measuringMode: measuringMode, currentScale: _currentScale),
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      // onScaleStart: handleScaleStart,
-                      // onScaleUpdate: handleScaleUpdate,
-                      onTapDown: measuringMode ? (details){
-                        if(_offsets.length<2)
-                        {
-                          Toast.show("Now tap to set your second point.", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.TOP);
-                        }
-                        final RenderBox referenceBox = context.findRenderObject();
+                ) : Container(),
+                //Spacer(),
+                this.widget.selectedMenuButtonIndex==1 ? Positioned(
+                  bottom: 125,
+                    child: scaleWidget(1)
+                ) : Container(),
+                // Positioned(
+                //   top: 0,
+                //   height: 100,
+                //   width: MediaQuery.of(context).size.width,
+                //   child: TabBarView(
+                //     controller: _appBarTabController,
+                //     children: [
+                //       Container(),
+                //       fSlider(),
+                //       Container(
+                //         padding: EdgeInsets.only(left: 20,right: 20),
+                //         child: Row(
+                //           children: [
+                //             Icon(Icons.brightness_4_rounded, color: whiteColor,),
+                //             Expanded(child: lightIntensitySlider()),
+                //             Icon(Icons.brightness_low_rounded, color: whiteColor),
+                //           ],
+                //         ),
+                //       ),
+                //       Text("Slideer fbh", style: TextStyle(color: whiteColor),)
+                //     ],
+                //   ),
+                // ),
+                Positioned(
+                  top: 59.5,
+                  child: featureControlsRow(
+                    context: context,
+                    magnifyTapped: magnifyTapped,
+                    onMagnifyTapped: onMagnifyTapped,
+                    focusTapped: focusTapped,
+                    onFocusTapped: onFocusTapped,
+                    lightTapped: lightTapped,
+                    onLightTapped: onLightTapped
+                  ),
+                ),
+                magnifyTapped ? Positioned(
+                  left: 55,
+                  top: 150,
+                  child: magnificationSlider(
+                    context: context,
+                    sliderValue: _magnificationSliderValue,
+                    onChanged: (value) async {
+                      setState(() {
+                        _magnificationSliderValue = value;
+                      });
+                      setState(() {
+                        _currentScale = (_baseScale*value).clamp(_minAvailableZoom, _maxAvailableZoom);
+                        scaleEnd = 12/_currentScale;
+                        debugPrint(scaleEnd.toString());
+                      });
+                      await cameraController.setZoomLevel(_currentScale);
+                    },
+                    magnificationTextEditingController: magnificationTextEditingController,
+                    onClearTapped: (){
+                      setState(() {
+                        magnificationTextEditingController.clear();
+                      });
+                    },
+                    onPlusTapped: () async {
+                      var value = double.parse(magnificationTextEditingController.text);
+                      setState(() {
+                        _magnificationSliderValue = value;
+                      });
+                      setState(() {
+                        _currentScale = (_baseScale*value).clamp(_minAvailableZoom, _maxAvailableZoom);
+                        scaleEnd = 12/_currentScale;
+                        debugPrint(scaleEnd.toString());
+                      });
+                      await cameraController.setZoomLevel(_currentScale);
+                    }
+                  ),
+                ) : Container(),
+                lightTapped ? Positioned(
+                  right: 55,
+                  top: 150,
+                  child: lightIntensitySlider(
+                      context: context,
+                      sliderValue: _lightIntensitySliderValue,
+                      onChanged: (value){
                         setState(() {
-                          _offsets.add(referenceBox.globalToLocal(details.globalPosition));
+                          _lightIntensitySliderValue = value;
                         });
-                      } : null,
-                      child: Container(
-                        margin: const EdgeInsets.only(top: 150),
-                        child: Align(
-                          alignment: Alignment.topCenter,
-                          child: Container(
-                            height: 300,
-                            width: 300,
-                            decoration: BoxDecoration(
-                                color: Colors.transparent,
-                                shape: BoxShape.circle
+                        flutterSocket.send('$value');
+                      }
+                  ),
+                ) : Container(),
+                Positioned(
+                    child: Container(
+                      margin: EdgeInsets.only(bottom: 40),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Spacer(),
+
+                          cameraController != null && cameraController.value.isInitialized && !cameraController.value.isRecordingVideo ?
+                          Spacer() :
+                          IconButton(
+                            icon: cameraController != null &&
+                                cameraController.value.isRecordingPaused
+                                ? Icon(Icons.play_arrow)
+                                : Icon(Icons.pause),
+                            color: Colors.white,
+                            onPressed: cameraController != null &&
+                                cameraController.value.isInitialized &&
+                                cameraController.value.isRecordingVideo
+                                ? (cameraController.value.isRecordingPaused)
+                                ? onResumeButtonPressed
+                                : onPauseButtonPressed
+                                : null,
+                          ),
+
+                          Spacer(),
+                          Container(
+                            height: 58,
+                            width: 58,
+                            child: cameraController != null &&
+                                cameraController.value.isInitialized &&
+                                !cameraController.value.isRecordingVideo ? IconButton(
+                                icon: SvgPicture.asset(
+                                  "assets/icons/Capture.svg",
+                                  width: 45,
+                                  height: 45,
+                                  color: videoMode ? redColor : whiteColor,
+                                ),
+                                onPressed: (){
+                                  if(videoMode){
+                                    onVideoRecordButtonPressed();
+                                  } else{
+                                    onCapture(context);
+                                  }
+                                }
+                            ) : IconButton(
+                                icon: Icon(
+                                    Icons.stop,
+                                  color: redColor,
+                                ),
+                                onPressed: (){onStopButtonPressed(context);}
                             ),
                           ),
-                        ),
-                      ),
-                    ),
-                  ) : Container(),
-                  //Spacer(),
-                  Positioned(
-                    bottom: 200,
-                      child: scaleWidget(1)
-                  ),
-                  SlidingUpPanel(
-                      maxHeight: MediaQuery.of(context).size.height*0.8,
-                      minHeight: 170,
-                      color: Colors.black,
-                      panel: Align(
-                      alignment: Alignment.topCenter,
-                      child: Container(
-                        child: Column(
-                          children: [
-                            Container(
-                              height: MediaQuery.of(context).size.height*0.8,
-                              width: double.infinity,
-                              padding: EdgeInsets.all(15),
-                              decoration: BoxDecoration(
-                                color: Colors.black,
+                          Spacer(),
+                          videoMode ?
+                          IconButton(
+                              icon: SvgPicture.asset(
+                                "assets/icons/Camera.svg",
+                                width: 45,
+                                height: 45,
+                                color: whiteColor,
                               ),
-                              child: Column(
-                                children: [
-                                  TabBar(
-                                      tabs: [
-                                        Tab(text: "Photo"),
-                                        Tab(text: "Video")
-                                      ],
-                                      indicatorColor: Colors.red,
-                                      labelColor: Colors.red,
-                                      unselectedLabelColor: Colors.white,
-                                      controller: _tabController,
-                                    ),
-                                  //scaleWidget(1),
-                                  Container(
-                                    height: MediaQuery.of(context).size.height*0.6,
-                                    child: TabBarView(
-                                      controller: _tabController,
-                                      children: [
-                                        photoControlsRow(context),
-                                        videoControlsRow(context)
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                              onPressed: (){
+                                if(cameraController != null &&
+                                    cameraController.value.isInitialized &&
+                                    !cameraController.value.isRecordingVideo){
+                                  setState(() {
+                                    videoMode = false;
+                                  });
+                                }
+                              }
+                          )
+                          : IconButton(
+                              icon: SvgPicture.asset(
+                                "assets/icons/Video.svg",
+                                width: 45,
+                                height: 45,
+                                color: whiteColor,
                               ),
-                            ),
-                          ],
-                        ),
+                              onPressed: (){
+                                setState(() {
+                                  videoMode = true;
+                                });
+                              }
+                          ),
+                          Spacer()
+                        ],
                       ),
-                    ),
-                  )
-                ],
-              ),
+                    )
+                ),
+                // SlidingUpPanel(
+                //     maxHeight: MediaQuery.of(context).size.height*0.8,
+                //     minHeight: 170,
+                //     color: Colors.black,
+                //     panel: Align(
+                //     alignment: Alignment.topCenter,
+                //     child: Container(
+                //       child: Column(
+                //         children: [
+                //           Container(
+                //             height: MediaQuery.of(context).size.height*0.8,
+                //             width: double.infinity,
+                //             padding: EdgeInsets.all(15),
+                //             decoration: BoxDecoration(
+                //               color: Colors.black,
+                //             ),
+                //             child: Column(
+                //               children: [
+                //                 TabBar(
+                //                     tabs: [
+                //                       Tab(text: "Photo"),
+                //                       Tab(text: "Video")
+                //                     ],
+                //                     indicatorColor: Colors.red,
+                //                     labelColor: Colors.red,
+                //                     unselectedLabelColor: Colors.white,
+                //                     controller: _tabController,
+                //                   ),
+                //                 //scaleWidget(1),
+                //                 Container(
+                //                   height: MediaQuery.of(context).size.height*0.6,
+                //                   child: TabBarView(
+                //                     controller: _tabController,
+                //                     children: [
+                //                       photoControlsRow(context),
+                //                       videoControlsRow(context)
+                //                     ],
+                //                   ),
+                //                 ),
+                //               ],
+                //             ),
+                //           ),
+                //         ],
+                //       ),
+                //     ),
+                //   ),
+                // ),
+              ],
             ),
           )
       ),

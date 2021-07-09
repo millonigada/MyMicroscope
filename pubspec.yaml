@@ -46,6 +46,10 @@ dependencies:
   cached_network_image: ^3.0.0
   sliding_up_panel: ^2.0.0+1
   shared_preferences: ^2.0.5
+  flutter_socket_plugin: ^2.0.0
+  flutter_svg: ^0.22.0
+  syncfusion_flutter_sliders: ^19.2.44
+  syncfusion_flutter_core: ^19.2.44+1
 
 dev_dependencies:
   flutter_test:
@@ -71,6 +75,16 @@ flutter:
     - assets/images/micro.png
     - assets/images/iconsMicroscope.png
     - assets/images/microscope.svg
+    - assets/icons/Capture.svg
+    - assets/icons/Camera.svg
+    - assets/icons/Exposure.svg
+    - assets/icons/Focus.svg
+    - assets/icons/Hamburger.svg
+    - assets/icons/Magnify.svg
+    - assets/icons/MaxLight.svg
+    - assets/icons/MinLight.svg
+    - assets/images/SplashScreen.png
+    - assets/icons/Video.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

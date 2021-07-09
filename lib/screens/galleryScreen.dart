@@ -227,6 +227,7 @@ class _GalleryScreenState extends State<GalleryScreen> with TickerProviderStateM
                   return ListView.builder(
                     itemCount: snapshot.data.docs.length,
                     itemBuilder: (BuildContext context, int index){
+                      var object = snapshot.data.docs[index].data() as Map<String, dynamic>;
                       return Column(
                         children: [
                           GestureDetector(
@@ -242,7 +243,7 @@ class _GalleryScreenState extends State<GalleryScreen> with TickerProviderStateM
                               //child: VideoPlayer(VideoPlayerController.file(File(snapshot.data.docs[index].data()["url"])))
                               child: Chewie(controller: ChewieController(
                                 //videoPlayerController: VideoPlayerController.file(VideoUtility.videoFromBase64String(snapshot.data[index])),
-                                videoPlayerController: VideoPlayerController.network(snapshot.data.docs[index].data()["url"]),
+                                videoPlayerController: VideoPlayerController.network(object["url"]),
                                 autoPlay: false,
                                 looping: false,
                                 autoInitialize: true,
@@ -255,7 +256,7 @@ class _GalleryScreenState extends State<GalleryScreen> with TickerProviderStateM
                           ),
                           TextButton.icon(
                               onPressed: (){
-                                deleteVideo(snapshot.data.docs[index].data()["url"],snapshot.data.docs[index].data()["docId"]);
+                                deleteVideo(object["url"],object["docId"]);
                                 // VideoUtility.removeVideoFromPreferences(snapshot.data[index]);
                                 // setState(() {});
                               },

@@ -23,17 +23,17 @@ class _VideoScreenState extends State<VideoScreen> {
 
   Future uploadFile() async {
     var storage = FirebaseStorage.instance;
-    TaskSnapshot snapshot = await storage
-        .ref()
-        .child("videos/${widget.videoFile.hashCode}")
-        .putFile(File(widget.videoPath));
-    String downloadUrl = await snapshot.ref.getDownloadURL();
-    VideoUtility.saveVideoToPreferences(downloadUrl);
-    await FirebaseFirestore.instance
-        .collection("videos")
-        .doc('${widget.videoFile.hashCode}')
-        .set({"url": downloadUrl, "docId": '${widget.videoFile.hashCode}'});
-    debugPrint('Succesfully added video.');
+    // TaskSnapshot snapshot = await storage
+    //     .ref()
+    //     .child("videos/${widget.videoFile.hashCode}")
+    //     .putFile(File(widget.videoPath));
+    // String downloadUrl = await snapshot.ref.getDownloadURL();
+    // VideoUtility.saveVideoToPreferences(downloadUrl);
+    // await FirebaseFirestore.instance
+    //     .collection("videos")
+    //     .doc('${widget.videoFile.hashCode}')
+    //     .set({"url": downloadUrl, "docId": '${widget.videoFile.hashCode}'});
+    // debugPrint('Succesfully added video.');
   }
 
   // Future uploadFile() async {

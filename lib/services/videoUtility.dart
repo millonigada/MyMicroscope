@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:my_camera/constants/keys.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -7,7 +8,7 @@ import 'dart:io';
 
 class VideoUtility {
 
-  static const String KEY = "VIDEO_LIST_KEY";
+  static String KEY = videoKey;
  
   static Future<List> getVideoListFromPreferences() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();

@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "microscopegirl-llep",
+  "private_key_id": "b38e0ae7789a3e4fc1e84b0f9d96281810fd940b",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCkZdUMbxbVIfUn\nnSUbr44oJXeKFpWNsJKB3yfiavgXcqMuIx9x1o9BqXEag/ps1eOIWy3p06hmZwWu\n2oZ/xrWg4HexZXMu/cWPDApb0ep35iWSwLipDy8CL6J1rCVyOvdufMQ+BCyNl3AX\njumDB1o6L6BKHGPtycI4OVKd7BkWSAmaNrX1dNClm4iWKLIlnbB9PQlaq+iw4a1l\nke4MHlYjh5tOhU3SAMz5z2lHjIx2/bB4ui0OpRdnqKC0Zi2Hb7ZN8l7JUO7/F7IF\nobaot5flvvqXxmnZeStJdCPGFDJQlI0PPVOPGfwOrMeot+1XKQRp+mF+V6TEctHX\nMi4zBGj7AgMBAAECggEANWd1LZxazPLCilNUrik541XEfuG2RHhzJ2hAMx+vpyJQ\n2xiCyv65u8lY2hW8gKV8zBtej2J4Bof6AyKu5Yw+DVxN1Z1QrRe4GS9+n/RRmBB1\n7TXY5uZtTWb+/f3ljjWUklpKf6DofjiPK7/7oFp/l35IMjsFxUWw54XLjkyXm7JW\nKpMmHH6QvxnG0yXI1Jw9JGOSaM1Ie19FVWvS+6s6E4Wp+yjgjcmR/ES9nUU/fvjz\nFOdi148uPJxVGSPZq6u60KJV6rya5t+K1KbqTd1tenyZf234OwE5dhR1rolW21pF\n2E3TMsPaTcJWk1VvQI7OYzZ6LMOjW8rPRW5jpUBGdQKBgQDiToU+gfNDxHcJLLfF\nhQ2C0MERCjtFsEtmhbyWZqDm2nRvuukC9v7a8IjNcXPdKo0ct8fcFtOdTPDrHkyg\nWYFdMJog+lLppeLR/Z0FV1g2z+YT51IvdYt5kJxiQf8YWPCtdbvI/3lt7vK3sysf\nRaSJeF/0tbjq70LEY3JgWUn9PwKBgQC599XMCYrOcrzJFpJPqfjBFtDwYSJMYWUX\n5Dn7+3Cnz4OkrfbgwnCLoTegmp4sgNHttM7YsQpi57tl/TZYz8LAsOqFeZYmWbx+\nSstp2gZKQekuygA61ee8hD3d2KC9WEBGw8JAj1aEqkegDJbYNJGeLpN875s7M4/E\nuUxXiagZRQKBgAf6CIxJfE+ZLzDtmJSnufAwd32oRKqSKjY05I7Qkz9P1+bQScJG\n/nitHcVQCGt1QoAOokbJry/ONHe1G7JTNVIZknUzHZUKudH5BH3ZtExKS6vL7YOq\nuv3P8RMtjFZJXEJg8fuFtbwAPiHneM+jXsdRrOAtP5VYVZwifTeULh11AoGAKh5a\nerKykF1mKnkFPCu33iuHuNmXBguM9ONIyqxA8JDMNPD9mBwRl141FhfOuS+X3Cl2\nK5e1TX9Eby3xMB4l8rRe+Un3Wso6KbRQ67FoeUsCQAmaEbk+mfCtfmBAz4F8VUqi\n5TJRmwxh2nrfcyo8zMGpv8MYukjMR/bbtnvD6a0CgYBdmuAn6xSKORaFOQXO/m21\n5w9qNoaTneXH0I5u3TY2pJ3YdIOCuJRNDv6UxZByU6aEgQFd0aL5JEllr+5iBlT5\nurZHfcxnTTDLOzstmkMxfPA8bwxkqQi7lyJbY57N17OJAu3dl9XMNGtsSsL4ghtF\n20PyjG7YvxUlrh0qkjdp7A==\n-----END PRIVATE KEY-----\n",
+  "client_email": "microscope-chatbot-service-acc@microscopegirl-llep.iam.gserviceaccount.com",
+  "client_id": "108295689613307534205",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/microscope-chatbot-service-acc%40microscopegirl-llep.iam.gserviceaccount.com"
+}

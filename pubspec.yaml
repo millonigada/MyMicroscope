@@ -85,6 +85,11 @@ flutter:
     - assets/icons/MinLight.svg
     - assets/images/SplashScreen.png
     - assets/icons/Video.svg
+    - assets/images/emoGirl.jpeg
+    - assets/images/emoGirlCrying.jpeg
+    - assets/images/emoGirlExcited.jpeg
+    - assets/images/emoGirlHappy.jpeg
+    - assets/images/emoGirlSad.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

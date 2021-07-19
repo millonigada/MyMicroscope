@@ -4,6 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:my_camera/constants/colors.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:io';
@@ -11,7 +12,7 @@ import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:my_camera/services/imageUtility.dart';
 import 'package:my_camera/services/videoUtility.dart';
 
-class SingleImage extends StatelessWidget {
+class SingleImage extends StatefulWidget {
   
   // final String url;
   // final String docId;
@@ -19,18 +20,38 @@ class SingleImage extends StatelessWidget {
   final String base64string;
   SingleImage({this.image, this.base64string});
 
-  // deleteImage(BuildContext context) async {
-  //   var st = await FirebaseStorage.instance.refFromURL(url);
-  //   debugPrint(st.fullPath);
-  //   await st.delete();
-  //   await FirebaseFirestore.instance.collection('images').doc(docId).delete();
-  //   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context){
-  //     return GalleryScreen();
-  //   }));
-  // }
+  @override
+  _SingleImageState createState() => _SingleImageState();
+}
+
+class _SingleImageState extends State<SingleImage> {
+
+  TextEditingController _textEditingController = TextEditingController();
+  List<Map> tempMap = [
+    {
+      "text": "right",
+      "image": "assets/images/emoGirlExcited.jpeg",
+      "reply": "Yay! That's correct!",
+    },
+    {
+      "text": "somewhat right",
+      "image": "assets/images/emoGirlHappy.jpeg",
+      "reply": "You're close, the correct answer is blah blah",
+    },
+    {
+      "text": "somewhat wrong",
+      "image": "assets/images/emoGirlSad.jpeg",
+      "reply": "Not Quite, you should have said blah blah",
+    },
+    {
+      "text": "wrong",
+      "image": "assets/images/emoGirlCrying.jpeg",
+      "reply": "No! You dont seem to have grasped this concept.",
+    }
+  ];
 
   deleteImage(BuildContext context){
-    ImageUtility.removeImageFromPreferences(base64string);
+    ImageUtility.removeImageFromPreferences(widget.base64string);
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context){
       return GalleryScreen();
     }));
@@ -41,28 +62,108 @@ class SingleImage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.black87,
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              child: image,
+      body: ListView(
+        //mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          //Divider(height: 20, color: whiteColor,),
+          Container(
+            margin: EdgeInsets.only(left: 10,right: 10),
+            //height: MediaQuery.of(context).size.height/1.5,
+            child: widget.image,
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Container(
+            margin: EdgeInsets.only(top: 20),
+            child: Text(
+              "Some question about the image?",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  color: whiteColor,
+                  fontWeight: FontWeight.w400,
+                  fontSize: 18
+              ),
             ),
-            SizedBox(
-              height: 10,
+          ),
+          Container(
+            decoration: BoxDecoration(
+                color: whiteColor,
+                borderRadius: BorderRadius.circular(8)
             ),
-            TextButton.icon(
-                onPressed: (){
-                  deleteImage(context);
+            height: 40,
+            margin: EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 20),
+            padding: EdgeInsets.only(left: 10, right: 10, top: 5),
+            child: Center(
+              child: TextField(
+                controller: _textEditingController,
+                onSubmitted: (text){
+                  int index=2;
+                  for(int i=0;i<tempMap.length;i++){
+                    if(text==tempMap[i]["text"]){
+                      index = i;
+                      break;
+                    }
+                  }
+                  showDialog(context: context,
+                      builder: (BuildContext context){
+                        return AlertDialog(
+                          backgroundColor: Colors.grey[850],
+                          content: Container(
+                            width: 0.8*MediaQuery.of(context).size.width,
+                            height: 100,
+                            decoration: BoxDecoration(
+                                color: Colors.transparent
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 100,
+                                  child: Image(
+                                    image: AssetImage(
+                                        tempMap[index]["image"]
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  child: Flexible(
+                                    child: Text(
+                                      tempMap[index]["reply"],
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w400,
+                                        color: whiteColor,
+                                      ),
+                                      softWrap: true,
+                                      maxLines: 5,
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+                  );
                 },
-                icon: Icon(
-                    Icons.delete,
-                  color: Colors.red,
+                decoration: new InputDecoration.collapsed(
+                  hintText: "Your answer",
                 ),
-                label: Text('Delete', style: TextStyle(color: Colors.white),)
+                //maxLines: 7
+              ),
             ),
-          ],
-        ),
+          ),
+          TextButton.icon(
+              onPressed: (){
+                deleteImage(context);
+              },
+              icon: Icon(
+                  Icons.delete,
+                color: Colors.red,
+              ),
+              label: Text('Delete', style: TextStyle(color: Colors.white),)
+          ),
+        ],
       ),
     );;
   }

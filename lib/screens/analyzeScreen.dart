@@ -44,9 +44,10 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   SvgPicture.asset(
-                    "assets/icons/SavedToGallery",
+                    "assets/icons/SavedToGallery.svg",
                     height: 176,
                     width: 176,
+                    color: darkBlueColor,
                   ),
                   Text(
                     "Saved to gallery",
@@ -105,6 +106,8 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         }
     );
     Timer(Duration(seconds: 2), (){
+      Navigator.pop(context);
+      Navigator.pop(context);
       Navigator.push(context, MaterialPageRoute(builder: (context)=>ChatScreen(imgFile: widget.imgFile, imgPath: widget.imgPath,)));
     });
   }
@@ -185,6 +188,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                                     onTap: (){
                                       Navigator.pop(context);
                                       startAnalyzing(context);
+                                      Navigator.pop(context);
                                     },
                                     child: Container(
                                       height: 33,

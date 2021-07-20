@@ -4,7 +4,11 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:my_camera/constants/colors.dart';
+import 'package:my_camera/screens/detailsScreen.dart';
+import 'package:my_camera/styles/theme.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:io';
@@ -61,105 +65,88 @@ class _SingleImageState extends State<SingleImage> {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      backgroundColor: Colors.black87,
-      body: ListView(
-        children: [
-          Container(
-            child: widget.image,
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Container(
-            margin: EdgeInsets.only(top: 20),
-            child: Text(
-              "Some question about the image?",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  color: whiteColor,
-                  fontWeight: FontWeight.w400,
-                  fontSize: 18
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Column(
+          //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: Stack(
+                  children: [
+                    Container(
+                        child: widget.image
+                    ),
+                    Positioned(
+                      top: 75,
+                      left: 25,
+                      child: IconButton(
+                        onPressed: (){
+                          Navigator.pop(context);
+                        },
+                        icon: SvgPicture.asset(
+                          "assets/icons/Back.svg",
+                          width: 12,
+                          height: 24,
+                          color: whiteColor,
+                        ),
+                      ),
+                    ),
+                  ]
               ),
             ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-                color: whiteColor,
-                borderRadius: BorderRadius.circular(8)
-            ),
-            height: 40,
-            margin: EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 20),
-            padding: EdgeInsets.only(left: 10, right: 10, top: 5),
-            child: Center(
-              child: TextField(
-                controller: _textEditingController,
-                onSubmitted: (text){
-                  int index=2;
-                  for(int i=0;i<tempMap.length;i++){
-                    if(text==tempMap[i]["text"]){
-                      index = i;
-                      break;
-                    }
-                  }
-                  showDialog(context: context,
-                      builder: (BuildContext context){
-                        return AlertDialog(
-                          backgroundColor: Colors.grey[850],
-                          content: Container(
-                            width: 0.8*MediaQuery.of(context).size.width,
-                            height: 100,
-                            decoration: BoxDecoration(
-                                color: Colors.transparent
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 100,
-                                  child: Image(
-                                    image: AssetImage(
-                                        tempMap[index]["image"]
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  child: Flexible(
-                                    child: Text(
-                                      tempMap[index]["reply"],
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w400,
-                                        color: whiteColor,
-                                      ),
-                                      softWrap: true,
-                                      maxLines: 5,
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
+            Container(
+              width: MediaQuery.of(context).size.width,
+              height: 99,
+              decoration: BoxDecoration(
+                  gradient: buttonGradient
+              ),
+              child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      IconButton(
+                          icon: SvgPicture.asset(
+                            "assets/icons/Download.svg",
+                            height: 30,
+                            color: whiteColor,
                           ),
-                        );
-                      }
-                  );
-                },
-                decoration: new InputDecoration.collapsed(
-                  hintText: "Your answer",
-                ),
-                //maxLines: 7
+                          onPressed: (){}
+                      ),
+                      IconButton(
+                          icon: SvgPicture.asset(
+                            "assets/icons/Favourite.svg",
+                            height: 30,
+                            color: whiteColor,
+                          ),
+                          onPressed: (){}
+                      ),
+                      IconButton(
+                          icon: SvgPicture.asset(
+                            "assets/icons/Delete.svg",
+                            height: 30,
+                            color: whiteColor,
+                          ),
+                          onPressed: (){
+                            deleteImage(context);
+                          }
+                      ),
+                      IconButton(
+                          icon: SvgPicture.asset(
+                            "assets/icons/Details.svg",
+                            height: 30,
+                            color: whiteColor,
+                          ),
+                          onPressed: (){
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=>DetailsScreen()));
+                          }
+                      )
+                    ],
+                  )
               ),
-            ),
-          ),
-          TextButton.icon(
-              onPressed: (){
-                deleteImage(context);
-              },
-              icon: Icon(
-                  Icons.delete,
-                color: Colors.red,
-              ),
-              label: Text('Delete', style: TextStyle(color: Colors.white),)
-          ),
-        ],
+            )
+          ],
+        ),
       ),
     );
   }
@@ -232,7 +219,7 @@ class _GalleryScreenState extends State<GalleryScreen> with TickerProviderStateM
     //loadImageListFromPreferences();
     getMedia();
     debugPrint(imgList.toString());
-    _tabController = new TabController(vsync: this, length: 2);
+    _tabController = new TabController(vsync: this, length: 3);
   }
 
   deleteVideo(String url, String docId) async {
@@ -256,35 +243,55 @@ class _GalleryScreenState extends State<GalleryScreen> with TickerProviderStateM
   Widget build(BuildContext context) {
     Orientation deviceOrientation = MediaQuery.of(context).orientation;
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Gallery'),
-        centerTitle: true,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        title: IconButton(
+          icon: SvgPicture.asset(
+            "assets/icons/Back.svg",
+            width: 12,
+            height: 24,
+            color: whiteColor,
+          ),
+          onPressed: (){
+            Navigator.pop(context);
+          },
+        ),
         bottom: TabBar(
+          indicatorSize: TabBarIndicatorSize.label,
+          indicatorColor: amberColor,
+          indicatorPadding: EdgeInsets.zero,
+          indicatorWeight: 2,
+          labelColor: amberColor,
+          labelPadding: EdgeInsets.zero,
+          unselectedLabelColor: whiteColor,
           controller: _tabController,
           tabs: [
+            Tab(text: "All"),
             Tab(text: "Photos"),
             Tab(text: "Videos")
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-        Container(
-                height: (MediaQuery.of(context).size.height),
-                margin: EdgeInsets.all(10),
-                child: FutureBuilder(
-                  //future: imgList,
-                  future: ImageUtility.getImageListFromPreferences(),
-                  builder: (context, AsyncSnapshot<List> snapshot){
-                    if (snapshot.connectionState == ConnectionState.done && snapshot.data!=null){
-                      return GridView.builder(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: (deviceOrientation == Orientation.portrait) ? 3 : 5,
-                            crossAxisSpacing: 5,
-                            mainAxisSpacing: 5
-                        ),
+      body: Container(
+        decoration: BoxDecoration(
+            gradient: backgroundGradient
+        ),
+        child: TabBarView(
+          controller: _tabController,
+          children: [
+            Container(
+              height: (MediaQuery.of(context).size.height),
+              margin: EdgeInsets.all(10),
+              child: FutureBuilder(
+                //future: imgList,
+                future: ImageUtility.getImageListFromPreferences(),
+                builder: (context, AsyncSnapshot<List> snapshot){
+                  if (snapshot.connectionState == ConnectionState.done && snapshot.data!=null){
+                    return StaggeredGridView.countBuilder(
+                      mainAxisSpacing: 28,
+                        crossAxisSpacing: 28,
+                        crossAxisCount: 4,
                         itemCount: snapshot.data.length,
                         itemBuilder: (BuildContext context, int index){
                           return GestureDetector(
@@ -293,92 +300,134 @@ class _GalleryScreenState extends State<GalleryScreen> with TickerProviderStateM
                                 return SingleImage(image: ImageUtility.imageFromBase64String(snapshot.data[index]), base64string: snapshot.data[index]);
                               }));
                             },
-                            child: GridTile(
-                              child: Container(
-                                color: Colors.black87,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(14),
                                 child: ImageUtility.imageFromBase64String(snapshot.data[index])
-                              ),
                             ),
                           );
                         },
-                      );
-                    }
-                    else if (snapshot.connectionState == ConnectionState.none) {
-                      return Text("No data");
-                    }
-                    else{
-                      return Center(child: Text("Your saved images will be visible here."));
-                    }
-                    return CircularProgressIndicator();
-                  },
-                ),
-          ),
-          Container(
-            height: (MediaQuery.of(context).size.height)*0.4,
-            margin: EdgeInsets.all(10),
-            child: FutureBuilder(
-              future: videoList,
-              //future: VideoUtility.getVideoListFromPreferences(),
-              builder: (context, AsyncSnapshot<QuerySnapshot> snapshot){
-                if (snapshot.connectionState == ConnectionState.done && snapshot.data!=null){
-                  return ListView.builder(
-                    itemCount: snapshot.data.docs.length,
-                    itemBuilder: (BuildContext context, int index){
-                      var object = snapshot.data.docs[index].data() as Map<String, dynamic>;
-                      return Column(
-                        children: [
-                          GestureDetector(
-                            // onTap: () {
-                            //   Navigator.push(context, MaterialPageRoute(builder: (context){
-                            //     return SingleVideo(url: snapshot.data.docs[index].data()["url"]);
-                            //   }));
-                            // },
-                            child: Container(
-                              height: MediaQuery.of(context).size.height/3.3,
-                              margin: EdgeInsets.all(5),
-                              //color: Colors.blueGrey,
-                              //child: VideoPlayer(VideoPlayerController.file(File(snapshot.data.docs[index].data()["url"])))
-                              child: Chewie(controller: ChewieController(
-                                //videoPlayerController: VideoPlayerController.file(VideoUtility.videoFromBase64String(snapshot.data[index])),
-                                videoPlayerController: VideoPlayerController.network(object["url"]),
-                                autoPlay: false,
-                                looping: false,
-                                autoInitialize: true,
+                        staggeredTileBuilder: (index)=>StaggeredTile.fit(2)
+                    );
+                  }
+                  else if (snapshot.connectionState == ConnectionState.none) {
+                    return Text("No data");
+                  }
+                  else{
+                    return Center(child: Text("Your saved images will be visible here."));
+                  }
+                  return CircularProgressIndicator();
+                },
+              ),
+            ),
+            Container(
+                  height: (MediaQuery.of(context).size.height),
+                  margin: EdgeInsets.all(10),
+                  child: FutureBuilder(
+                    //future: imgList,
+                    future: ImageUtility.getImageListFromPreferences(),
+                    builder: (context, AsyncSnapshot<List> snapshot){
+                      if (snapshot.connectionState == ConnectionState.done && snapshot.data!=null){
+                        return GridView.builder(
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: (deviceOrientation == Orientation.portrait) ? 3 : 5,
+                              crossAxisSpacing: 5,
+                              mainAxisSpacing: 5
+                          ),
+                          itemCount: snapshot.data.length,
+                          itemBuilder: (BuildContext context, int index){
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(context, MaterialPageRoute(builder: (context){
+                                  return SingleImage(image: ImageUtility.imageFromBase64String(snapshot.data[index]), base64string: snapshot.data[index]);
+                                }));
+                              },
+                              child: GridTile(
+                                child: Container(
+                                  color: Colors.black87,
+                                  child: ImageUtility.imageFromBase64String(snapshot.data[index])
+                                ),
                               ),
+                            );
+                          },
+                        );
+                      }
+                      else if (snapshot.connectionState == ConnectionState.none) {
+                        return Text("No data");
+                      }
+                      else{
+                        return Center(child: Text("Your saved images will be visible here."));
+                      }
+                      return CircularProgressIndicator();
+                    },
+                  ),
+            ),
+            Container(
+              height: (MediaQuery.of(context).size.height)*0.4,
+              margin: EdgeInsets.all(10),
+              child: FutureBuilder(
+                future: videoList,
+                //future: VideoUtility.getVideoListFromPreferences(),
+                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot){
+                  if (snapshot.connectionState == ConnectionState.done && snapshot.data!=null){
+                    return ListView.builder(
+                      itemCount: snapshot.data.docs.length,
+                      itemBuilder: (BuildContext context, int index){
+                        var object = snapshot.data.docs[index].data() as Map<String, dynamic>;
+                        return Column(
+                          children: [
+                            GestureDetector(
+                              // onTap: () {
+                              //   Navigator.push(context, MaterialPageRoute(builder: (context){
+                              //     return SingleVideo(url: snapshot.data.docs[index].data()["url"]);
+                              //   }));
+                              // },
+                              child: Container(
+                                height: MediaQuery.of(context).size.height/3.3,
+                                margin: EdgeInsets.all(5),
+                                //color: Colors.blueGrey,
+                                //child: VideoPlayer(VideoPlayerController.file(File(snapshot.data.docs[index].data()["url"])))
+                                child: Chewie(controller: ChewieController(
+                                  //videoPlayerController: VideoPlayerController.file(VideoUtility.videoFromBase64String(snapshot.data[index])),
+                                  videoPlayerController: VideoPlayerController.network(object["url"]),
+                                  autoPlay: false,
+                                  looping: false,
+                                  autoInitialize: true,
+                                ),
+                                ),
                               ),
                             ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          TextButton.icon(
-                              onPressed: (){
-                                deleteVideo(object["url"],object["docId"]);
-                                // VideoUtility.removeVideoFromPreferences(snapshot.data[index]);
-                                // setState(() {});
-                              },
-                              icon: Icon(
-                                Icons.delete,
-                                color: Colors.red,
-                              ),
-                              label: Text('Delete', style: TextStyle(color: Colors.black87),)
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                }
-                else if (snapshot.connectionState == ConnectionState.none) {
-                  return Text("No data");
-                }
-                else{
-                  return Center(child: Text("Your saved videos will be visible here."));
-                }
-                return CircularProgressIndicator();
-              },
+                            SizedBox(
+                              height: 10,
+                            ),
+                            TextButton.icon(
+                                onPressed: (){
+                                  deleteVideo(object["url"],object["docId"]);
+                                  // VideoUtility.removeVideoFromPreferences(snapshot.data[index]);
+                                  // setState(() {});
+                                },
+                                icon: Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                ),
+                                label: Text('Delete', style: TextStyle(color: Colors.black87),)
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                  else if (snapshot.connectionState == ConnectionState.none) {
+                    return Text("No data");
+                  }
+                  else{
+                    return Center(child: Text("Your saved videos will be visible here."));
+                  }
+                  return CircularProgressIndicator();
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

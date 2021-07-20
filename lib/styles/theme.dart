@@ -42,3 +42,9 @@ LinearGradient buttonGradient = LinearGradient(
       darkBlueButtonColor
     ]
 );
+
+TextStyle detailsTextStyle = TextStyle(
+  color: whiteColor,
+  fontSize: 18,
+  fontWeight: FontWeight.w400
+);

@@ -73,15 +73,24 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),)
             ),
             Positioned(
-                bottom: 33,
+                bottom: 139,
+                right: (MediaQuery.of(context).size.width-352)/2,
                 child: Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: whiteColor,
+                    borderRadius: BorderRadius.circular(14)
+                  ),
                   height: 53,
                   width: 352,
                   child: TextFormField(
                     decoration: InputDecoration(
                         border: OutlineInputBorder(),
                       suffixIcon: IconButton(
-                        icon: Icon(Icons.send),
+                        icon: Icon(
+                            Icons.send,
+                          color: darkBlueColor,
+                        ),
                       )
                     ),
                   ),

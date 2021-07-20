@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_camera/constants/colors.dart';
+import 'package:my_camera/styles/theme.dart';
 import 'cameraScreen.dart';
 import 'dart:async';
 import 'menuScreen.dart';
@@ -29,15 +30,8 @@ class _SplashScreenState extends State<SplashScreen> {
         onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MenuScreen())),
         child: Container(
           decoration: BoxDecoration(
-            color: whiteColor
-            // gradient: LinearGradient(
-            //   begin: Alignment.topCenter,
-            //   end: Alignment.bottomCenter,
-            //   colors: [
-            //     Colors.blue,
-            //     Colors.blueAccent
-            //   ]
-            // )
+            // color: whiteColor
+            gradient: backgroundGradient
           ),
           child: Center(
             child: Image(

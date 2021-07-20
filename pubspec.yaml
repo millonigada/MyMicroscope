@@ -50,6 +50,8 @@ dependencies:
   flutter_svg: ^0.22.0
   syncfusion_flutter_sliders: ^19.2.44
   syncfusion_flutter_core: ^19.2.44+1
+  flutter_staggered_grid_view: ^0.4.0
+  bubble: ^1.2.1
 
 dev_dependencies:
   flutter_test:
@@ -66,30 +68,38 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # assets:
-  #   - assets/images/activity_feed.svg
-  #   - assets/images/microscope.svg
-
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/images/micro.png
-    - assets/images/iconsMicroscope.png
-    - assets/images/microscope.svg
+    - assets/icons/Back.svg
     - assets/icons/Capture.svg
     - assets/icons/Camera.svg
+    - assets/icons/Delete.svg
+    - assets/icons/Details.svg
+    - assets/icons/Download.svg
     - assets/icons/Exposure.svg
+    - assets/icons/Favourite.svg
     - assets/icons/Focus.svg
     - assets/icons/Hamburger.svg
     - assets/icons/Magnify.svg
     - assets/icons/MaxLight.svg
     - assets/icons/MinLight.svg
-    - assets/images/SplashScreen.png
+    - assets/icons/SavedToGallery.svg
     - assets/icons/Video.svg
+    - assets/images/ChatBubble.svg
     - assets/images/emoGirl.jpeg
     - assets/images/emoGirlCrying.jpeg
     - assets/images/emoGirlExcited.jpeg
     - assets/images/emoGirlHappy.jpeg
+    - assets/images/emoGirlLargeNormal.png
     - assets/images/emoGirlSad.jpeg
+    - assets/images/gallery.png
+    - assets/images/iconsMicroscope.png
+    - assets/images/micro.png
+    - assets/images/microscope.svg
+    - assets/images/microworld.png
+    - assets/images/observation.png
+    - assets/images/sizedist.png
+    - assets/images/SplashScreen.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

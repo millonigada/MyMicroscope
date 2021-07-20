@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:my_camera/constants/colors.dart';
 
 ThemeData mainTheme = ThemeData(
-  primarySwatch: createMaterialColor(amberColor),
+  primarySwatch: createMaterialColor(darkBlueColor),
 );
 
 MaterialColor createMaterialColor(Color color) {
@@ -24,3 +24,21 @@ MaterialColor createMaterialColor(Color color) {
   });
   return MaterialColor(color.value, swatch);
 }
+
+LinearGradient backgroundGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      darkBlueColor,
+      lightBlueColor
+    ]
+);
+
+LinearGradient buttonGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      lightBlueButtonColor,
+      darkBlueButtonColor
+    ]
+);

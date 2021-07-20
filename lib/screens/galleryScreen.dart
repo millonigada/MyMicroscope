@@ -63,12 +63,8 @@ class _SingleImageState extends State<SingleImage> {
     return Scaffold(
       backgroundColor: Colors.black87,
       body: ListView(
-        //mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          //Divider(height: 20, color: whiteColor,),
           Container(
-            margin: EdgeInsets.only(left: 10,right: 10),
-            //height: MediaQuery.of(context).size.height/1.5,
             child: widget.image,
           ),
           SizedBox(
@@ -165,7 +161,7 @@ class _SingleImageState extends State<SingleImage> {
           ),
         ],
       ),
-    );;
+    );
   }
 }
 
